@@ -1,0 +1,81 @@
+// SPDX-License-Identifier: Apache-2.0
+package backend_test
+
+import (
+	"encoding/json"
+	"io"
+	"log/slog"
+	"net/http/httptest"
+	"strings"
+	"sync/atomic"
+	"testing"
+	"testing/fstest"
+
+	"github.com/kakj-go/Judex/internal/config"
+	transport "github.com/kakj-go/Judex/internal/transport/http"
+)
+
+func TestRoutingAndScaffoldBoundaries(t *testing.T) {
+	draining := &atomic.Bool{}
+	router := transport.NewRouter(transport.Options{Logger: slog.New(slog.NewTextHandler(io.Discard, nil)), Draining: draining, Assets: fstest.MapFS{"index.html": {Data: []byte("<!doctype html><title>Judex</title>")}, "assets/app.js": {Data: []byte("export const ready=true")}}})
+	cases := []struct {
+		method, path string
+		status       int
+		contains     string
+	}{
+		{"GET", "/healthz", 200, "ok"}, {"GET", "/readyz", 200, "http-scaffold"},
+		{"GET", "/api/v1/system", 200, "scaffold"}, {"GET", "/api/v1/workspace", 501, "NOT_IMPLEMENTED"},
+		{"POST", "/api/v1/auth/register", 501, "NOT_IMPLEMENTED"}, {"POST", "/api/v1/auth/login", 501, "NOT_IMPLEMENTED"},
+		{"GET", "/api/v1/missing", 404, "NOT_FOUND"}, {"GET", "/assets/missing.js", 404, "NOT_FOUND"},
+		{"GET", "/projects/example", 200, "<title>Judex"}, {"GET", "/assets/app.js", 200, "export const"},
+		{"POST", "/healthz", 405, "METHOD_NOT_ALLOWED"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.method+tc.path, func(t *testing.T) {
+			r := httptest.NewRecorder()
+			router.ServeHTTP(r, httptest.NewRequest(tc.method, tc.path, nil))
+			if r.Code != tc.status || !strings.Contains(r.Body.String(), tc.contains) {
+				t.Fatalf("status=%d body=%s", r.Code, r.Body)
+			}
+			if r.Header().Get("X-Request-ID") == "" {
+				t.Fatal("missing request id")
+			}
+			if strings.HasPrefix(tc.path, "/api/") {
+				var parsed map[string]any
+				if err := json.Unmarshal(r.Body.Bytes(), &parsed); err != nil {
+					t.Fatal("API returned non-JSON", err)
+				}
+			}
+		})
+	}
+	draining.Store(true)
+	r := httptest.NewRecorder()
+	router.ServeHTTP(r, httptest.NewRequest("GET", "/readyz", nil))
+	if r.Code != 503 {
+		t.Fatal("draining server is still ready")
+	}
+}
+func TestAPIWithoutWebBuild(t *testing.T) {
+	r := httptest.NewRecorder()
+	transport.NewRouter(transport.Options{}).ServeHTTP(r, httptest.NewRequest("GET", "/", nil))
+	if r.Code != 404 || !strings.Contains(r.Body.String(), "WEB_BUILD_MISSING") {
+		t.Fatal(r.Body.String())
+	}
+}
+func TestConfiguration(t *testing.T) {
+	c, err := config.FromEnv(func(string) string { return "" })
+	if err != nil || c.HTTPAddress != "127.0.0.1:8080" {
+		t.Fatal(c, err)
+	}
+	for key, value := range map[string]string{"JUDEX_ENV": "invalid", "JUDEX_HTTP_ADDR": "bad", "JUDEX_SHUTDOWN_TIMEOUT": "0s"} {
+		_, err := config.FromEnv(func(k string) string {
+			if k == key {
+				return value
+			}
+			return ""
+		})
+		if err == nil {
+			t.Fatal("invalid configuration accepted", key)
+		}
+	}
+}

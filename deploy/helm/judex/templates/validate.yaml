@@ -1,0 +1,20 @@
+{{- if and (not .Values.postgresql.embedded.enabled) (not .Values.postgresql.existingSecret) -}}
+{{- fail "External PostgreSQL requires postgresql.existingSecret (password key)" -}}
+{{- end -}}
+{{- if not .Values.objectStorage.embedded.enabled -}}
+{{- $_ := required "External S3 endpoint is required" .Values.objectStorage.external.endpoint -}}
+{{- $_ := required "External S3 bucket is required" .Values.objectStorage.external.bucket -}}
+{{- $_ := required "External S3 existingSecret is required" .Values.objectStorage.external.existingSecret -}}
+{{- end -}}
+{{- if and .Values.sandbox.enabled (ne (int (index .Values.opensandbox "opensandbox-server").server.replicaCount) 1) -}}
+{{- fail "OpenSandbox Lifecycle Server must remain single-active in this scaffold" -}}
+{{- end -}}
+{{- if and .Values.sandbox.enabled (gt (len .Release.Namespace) 53) -}}
+{{- fail "Release namespace must be at most 53 characters to allow the -sandboxes suffix" -}}
+{{- end -}}
+{{- if .Values.sandbox.enabled -}}
+{{- $server := index .Values.opensandbox "opensandbox-server" -}}
+{{- if or $server.fullnameOverride $server.namespaceOverride $server.nameOverride -}}
+{{- fail "OpenSandbox server name/namespace overrides are not supported by the Judex connection contract" -}}
+{{- end -}}
+{{- end -}}

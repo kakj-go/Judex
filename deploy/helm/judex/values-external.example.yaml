@@ -1,0 +1,16 @@
+postgresql:
+  embedded: {enabled: false}
+  username: judex
+  database: judex
+  existingSecret: judex-external-postgresql # key: password
+  external:
+    host: postgres.internal.example
+    port: 5432
+    sslMode: require
+objectStorage:
+  embedded: {enabled: false}
+  external:
+    endpoint: https://s3.internal.example
+    region: us-east-1
+    bucket: judex
+    existingSecret: judex-external-s3 # keys: access-key, secret-key

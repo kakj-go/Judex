@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+@import "./tokens.css";
+@import "./base.css";
+@import "./studio.css";
+@import "./workflow.css";
+@import "./conversation.css";
+@import "./agents.css";
+@import "./membership.css";
+@import "./work.css";
+@import "./work-layouts.css";
+@import "./task-cards.css";
+@import "./shell.css";
+
+@theme inline {
+ --color-judex-background: var(--bg);
+ --color-judex-surface: var(--surface);
+ --color-judex-ink: var(--ink);
+ --color-judex-accent: var(--accent);
+}

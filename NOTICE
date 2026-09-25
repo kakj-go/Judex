@@ -1,0 +1,6 @@
+Judex
+Copyright 2026 Judex contributors
+
+Judex is distributed under the Apache License, Version 2.0.
+Third-party dependencies retain their own licenses and notices.
+Vendored Helm dependency provenance is documented in deploy/helm/UPSTREAM.md.

@@ -1,0 +1,87 @@
+environment: development
+global:
+  sandboxAPIKeySecret: judex-opensandbox-auth
+  sandboxAPIKeyManaged: true
+replicaCount: 1
+image:
+  repository: judex/server
+  tag: 0.1.0-dev
+  pullPolicy: IfNotPresent
+service:
+  port: 8080
+ingress:
+  enabled: false
+  className: ""
+  host: judex.local
+  tlsSecret: ""
+resources:
+  requests: {cpu: 100m, memory: 128Mi}
+  limits: {cpu: "1", memory: 512Mi}
+postgresql:
+  embedded:
+    enabled: true
+    image: postgres:17.6-alpine
+    storage: 10Gi
+    storageClass: ""
+  username: judex
+  database: judex
+  existingSecret: ""
+  external:
+    host: ""
+    port: 5432
+    sslMode: require
+objectStorage:
+  embedded:
+    enabled: true
+    image: chrislusf/seaweedfs:4.47
+    storage: 20Gi
+    storageClass: ""
+  external:
+    endpoint: ""
+    region: us-east-1
+    bucket: ""
+    existingSecret: ""
+sandbox:
+  enabled: true
+  # One controller/CRD owner per cluster. Disable the controller subchart
+  # in additional releases when using an existing compatible operator.
+opensandbox:
+  opensandbox-controller:
+    enabled: true
+    crds: {install: true, keep: true}
+    controller:
+      replicaCount: 1
+      image:
+        repository: sandbox-registry.cn-zhangjiakou.cr.aliyuncs.com/opensandbox/controller
+        tag: v0.2.1
+  opensandbox-server:
+    server:
+      replicaCount: 1
+      image:
+        repository: sandbox-registry.cn-zhangjiakou.cr.aliyuncs.com/opensandbox/server
+        tag: v0.2.2
+      env:
+        - name: OPENSANDBOX_SERVER_API_KEY
+          valueFrom:
+            secretKeyRef: {name: '{{ .Values.global.sandboxAPIKeySecret }}', key: api-key}
+      resources:
+        requests: {cpu: 100m, memory: 256Mi}
+        limits: {cpu: "1", memory: 1Gi}
+    configToml: |
+      [server]
+      host = "0.0.0.0"
+      port = 80
+      api_key = ""
+      [log]
+      level = "INFO"
+      [runtime]
+      type = "kubernetes"
+      execd_image = "sandbox-registry.cn-zhangjiakou.cr.aliyuncs.com/opensandbox/execd:v1.0.22"
+      [kubernetes]
+      namespace = "{{ .Release.Namespace }}-sandboxes"
+      informer_enabled = true
+      workload_provider = "batchsandbox"
+      batchsandbox_template_file = "/etc/opensandbox/example.batchsandbox-template.yaml"
+      [egress]
+      image = "sandbox-registry.cn-zhangjiakou.cr.aliyuncs.com/opensandbox/egress:v1.1.6"
+      mode = "dns+nft"

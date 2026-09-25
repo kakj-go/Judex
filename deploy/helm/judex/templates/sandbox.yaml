@@ -1,0 +1,8 @@
+{{- if .Values.sandbox.enabled }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Release.Namespace }}-sandboxes
+  annotations: {helm.sh/resource-policy: keep}
+  labels: {{ include "judex.labels" . | nindent 4 }}
+{{- end }}

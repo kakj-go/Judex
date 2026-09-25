@@ -1,0 +1,6 @@
+dependencies:
+- name: opensandbox
+  repository: file://../vendor/opensandbox
+  version: 0.2.2-judex.1
+digest: sha256:090d81ed4b8a58dc2ab0067a0234bffc9dce4e31e14cfcff83b45f2ec333c21f
+generated: "2026-09-25T17:31:50.3478284+08:00"

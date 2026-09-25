@@ -1,0 +1,6 @@
+# Complete embedded infrastructure, development-sized resources.
+environment: development
+postgresql:
+  embedded: {enabled: true, storage: 5Gi}
+objectStorage:
+  embedded: {enabled: true, storage: 5Gi}

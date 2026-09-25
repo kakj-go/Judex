@@ -1,0 +1,16 @@
+.git
+.idea
+.agents
+.cache
+bin
+node_modules
+web/node_modules
+web/dist
+docs
+deploy/helm/vendor
+deploy/helm/judex/charts
+tests/reports
+tests/results
+**/*.format-tmp
+**/.env.local
+**/.env.*.local

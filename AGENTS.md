@@ -17,5 +17,5 @@
 
 - 当前企业门户仅支持 web 桌面端作为正式产品体验和验收范围；移动端导航、窄屏布局和移动端专属交互不属于本项目当前版本的实现与 E2E 验收目标。
 - i18n：每个业务模块一个 `src/i18n/<module>.ts`，导出 `<module>Zh` / `<module>En`，在 `src/i18n/index.ts` 的模块清单中注册即生效；通用文案放 `common.ts`。默认 `zh-CN`，偏好持久化在 `argus.locale`。
-- 样式：组件类名统一 `.judex-*` 前缀；颜色、字号、间距、圆角只引用 design token（`var(--*)`），禁止硬编码；页面级样式放 `src/styles/*.css`。
+- 样式：HeroUI 是唯一基础 UI 库，允许 HeroUI 类名和 Tailwind 工具类；自定义业务类名统一 `.judex-*` 前缀。颜色、字号、间距、圆角来自统一 design token，禁止业务组件中散落硬编码；页面级样式放 `web/src/styles/*.css`。
 - 前端要支持中英文双语，组件和样式要支持深色和浅色两种配色
