@@ -2,7 +2,7 @@
 
 ## 正式工程入口（2026-09-25）
 
-已生成工程骨架：`cmd/` 放 server、CLI、Agent 入口；`internal/` 放 Go + Gin 模块化单体；`web/` 放 React + HeroUI + Tailwind + Zustand + TanStack Query；`tests/` 集中测试；`deploy/` 放 Docker / Helm；根目录提供 Makefile 和 Apache-2.0 LICENSE / NOTICE。
+已生成工程骨架：`cmd/` 放 server 与 CLI 入口（Agent harness 位于 `internal/agent`，随 server 进程运行）；`internal/` 放 Go + Gin 模块化单体；`web/` 放 React + HeroUI + Tailwind + Zustand + TanStack Query；`tests/` 集中测试；`deploy/` 放 Docker / Helm；根目录提供 Makefile 和 Apache-2.0 LICENSE / NOTICE。
 
 需要 Go 1.25+、Node.js 22.12+、npm。在根目录执行 `go mod download`、`npm ci`，然后分别在两个终端运行：
 

@@ -26,7 +26,6 @@ web:
 build: build-api build-web
 build-api:
 	$(GO) build -trimpath -ldflags "-X github.com/kakj-go/Judex/internal/version.Version=$(VERSION)" -o bin/judex-server$(EXE) ./cmd/judex-server
-	$(GO) build -trimpath -o bin/judex-agent$(EXE) ./cmd/judex-agent
 	$(GO) build -trimpath -o bin/judex$(EXE) ./cmd/judex
 build-web:
 	$(NPM) run build --workspace @judex/web
